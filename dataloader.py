@@ -99,75 +99,66 @@ def load_ego_nets(input_dir, network_type='gplus'):
 
     return ego_nets
 
-def load_facebook100(input_dir):
-
-    networks = {}
+def load_facebook100(input_dir, name, num_egonets=10, egonets_radius=2):
 
     feat_names = ['status', 'gender', 'major', 'second_major', 'accomodation', 'year', 'high_school']
 
-    for file in glob.glob(input_dir + '/*.mat'):
+    filename = input_dir + '/' + name + '.mat'
+    mat = sio.loadmat(filename)
 
-        name = file.split('/')[-1].split('.')[0]
-        mat = sio.loadmat(file)
-
-        if 'A' in mat:
-            A = mat['A']
+    if 'A' in mat:
+        A = mat['A']
 
 
-        feats_dir = {}            
+    feats_dir = {}            
 
-        if 'local_info' in mat:
-            local_info = mat['local_info']
+    if 'local_info' in mat:
+        local_info = mat['local_info']
 
-        print(local_info.shape)
 
-        for i in range(len(local_info)):
-            feat = local_info[i]
-            
-            print(feat.shape)
+    for i in range(len(local_info)):
+        feat = local_info[i]
+        
 
-            temp = {}
-            for feat_name, f in zip(feat_names, feat):
-                if f != 0:
-                    if feat_name == 'status':
-                        if f == 1:
-                            temp[feat_name] = 'student'
-                        elif f == 2:
-                            temp[feat_name] = 'faculty'
-                    elif feat_name == 'accomodation':
-                        if f == 1:
-                            temp[feat_name] = 'house'
-                        elif f == 2:
-                            temp[feat_name] = 'dorm'
-                    elif feat_name == 'gender':
-                        if f == 1:
-                            temp[feat_name] = 'male'
-                        elif f == 2:
-                            temp[feat_name] = 'female'
-                    else:
-                        temp[feat_name] = f
+        temp = {}
+        for feat_name, f in zip(feat_names, feat):
+            if f != 0:
+                if feat_name == 'status':
+                    if f == 1:
+                        temp[feat_name] = 'student'
+                    elif f == 2:
+                        temp[feat_name] = 'faculty'
+                elif feat_name == 'accomodation':
+                    if f == 1:
+                        temp[feat_name] = 'house'
+                    elif f == 2:
+                        temp[feat_name] = 'dorm'
+                elif feat_name == 'gender':
+                    continue
+                    # if f == 1:
+                    #     temp[feat_name] = 'male'
+                    # elif f == 2:
+                    #     temp[feat_name] = 'female'
+                else:
+                    temp[feat_name] = int(f)
+
+        feats_dir[i] = temp
+
+    G = nx.from_numpy_array(A)
+    nx.set_node_attributes(G, feats_dir, 'features')
     
-            feats_dir[i] = temp
+    ego_nets = sample_ego_nets(G, n_samples=num_egonets, radius=egonets_radius)
+    return G, ego_nets
 
-        import pdb; pdb.set_trace()
+def sample_ego_nets(G, n_samples=10, radius=2, seed=0):
+    """
+    Sample n_samples ego nets from G.
+    """
+    random.seed(seed)
+    ego_nets = {}
+    nodes = list(G.nodes())
+    for i in range(n_samples):
+        ego_net = nx.ego_graph(G, random.choice(nodes), radius=radius)
+        ego_nets[i] = ego_net
 
-        G = nx.from_numpy_matrix(A)
-        networks[name] = G
-
-    return networks
-
-def load_insurance_dataset(input_dir):
-
-    dataset_dir = os.path.join(input_dir, 'data', 'data')
-
-    df = pd.read_stata(os.path.join(dataset_dir, '0422allinforawnet.dta'))
-
-    df1 = pd.read_stata(os.path.join(dataset_dir, '0422structure_all.dta'))
-
-    df2 = pd.read_stata(os.path.join(dataset_dir, '0422price.dta'))
-
-    df3 = pd.read_stata(os.path.join(dataset_dir, '0422survey.dta'))
-
-    import pdb; pdb.set_trace()
-
-load_insurance_dataset('datasets/insurance-dataset')
+    return ego_nets
