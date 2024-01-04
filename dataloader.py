@@ -99,7 +99,7 @@ def load_ego_nets(input_dir, network_type='gplus'):
 
     return ego_nets
 
-def load_facebook100(input_dir, name, num_egonets=10, egonets_radius=2):
+def load_facebook100(input_dir, name, num_egonets=10, egonets_radius=2, sample_egonets=True):
 
     feat_names = ['status', 'gender', 'major', 'second_major', 'accomodation', 'year', 'high_school']
 
@@ -147,8 +147,12 @@ def load_facebook100(input_dir, name, num_egonets=10, egonets_radius=2):
     G = nx.from_numpy_array(A)
     nx.set_node_attributes(G, feats_dir, 'features')
     
-    ego_nets = sample_ego_nets(G, n_samples=num_egonets, radius=egonets_radius)
-    return G, ego_nets
+    if sample_egonets:
+        networks = sample_ego_nets(G, n_samples=num_egonets, radius=egonets_radius)
+    else:
+        networks = {-1: G}
+        
+    return networks
 
 def sample_ego_nets(G, n_samples=10, radius=2, seed=0):
     """
