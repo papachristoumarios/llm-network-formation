@@ -2,7 +2,7 @@
 
 ## Installing Dependencies 
 
-To install the required packages use 
+The installation on a normal desktop computer should take a few minutes. To install the required packages use 
 
 ```bash
 pip install -r requirements.txt
