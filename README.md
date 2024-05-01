@@ -38,6 +38,19 @@ The (cached) outputs of the simulations are located in `outputs/`. If you wish t
 
 The simulation outputs for the real-world datasets can be found [here](https://drive.google.com/drive/folders/1pP-zOe4XS--5MArs6Hr4_hUmRhgomzzK?usp=drive_link). To include them in the project, download them and place them in the `outputs/` folder. 
 
+### Running the experiments on your own data
+
+In order to run the software on your own data, you need to create a dataloader method in the `dataloader.py` file, similar to `load_facebook100` and change the dataloader in `combined_model.ipynb`. The dataloader function should return a dictionary `networks` which has the labels of (potentially) multiple networks as keys, and the corresponding `nx.Graph` objects as values. Each `nx.graph` object can have features, which should be set using the `nx..set_node_attributes(G, feat_dict, 'features')` command where `feat_dict` is the dictionary of features (see also [here](https://networkx.org/documentation/stable/reference/generated/networkx.classes.function.set_node_attributes.html) for more information). 
+
+### Expected runtimes 
+
+The experiments in `principle_1.ipynb`, `principle_2.ipynb`, `principle_3.ipynb` and `principle_5.ipynb` should take at most an hour each to run using the `gpt-3.5-turbo` model on a normal laptop computer. 
+
+The experiments in `combined_model.ipynb` take several hours (~4-5 hours) each to run using the `gpt-4-1106-preview` model for the datasets in question on a normal laptop computer.
+
+### Test system specifications
+
+The experiments have been run at a MacBook M2 Pro with an Apple M2 Max chip, 32 GB of RAM, running macOS 13.0. The version of python used is Python 3.10.9. 
 
 ## Citation
 

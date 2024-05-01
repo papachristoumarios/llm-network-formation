@@ -12,8 +12,8 @@ build/
 develop-eggs/
 dist/
 downloads/
-eggs/
 datasets/
+eggs/
 .eggs/
 lib/
 lib64/
