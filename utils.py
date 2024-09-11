@@ -35,10 +35,11 @@ plt.rc('figure', titlesize=BIGGER_SIZE)  # fontsize of the figure title
 
 claude_client = anthropic.Anthropic(api_key=params['ANTHROPIC_API_KEY'])
 replicate_client = replicate.Client(api_token=params['REPLICATE_API_KEY'])
+openai_client = openai.Client(api_key=params['OPENAI_API_KEY'])
 
 def get_response(prompt, model, temperature=0.9, system_prompt="You are mimicking a real-life person who wants to make friends."):
     if model.startswith('gpt'):
-        result = openai.ChatCompletion.create(
+        result = openai_client.chat.completions.create(
         model=model,
         temperature=temperature,
         messages=[
@@ -46,7 +47,7 @@ def get_response(prompt, model, temperature=0.9, system_prompt="You are mimickin
                 {"role": "user", "content": prompt},
         ])
 
-        return result.choices[0]['message']['content']
+        return result.choices[0].message.content
     elif model.startswith('claude'):
         global claude_client
         result = claude_client.messages.create(
