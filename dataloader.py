@@ -28,7 +28,7 @@ def load_snap_ego_nets(input_dir, name):
 
     return {-1: G}
 
-def preprocess_snap_ego_nets(input_dir, network_type='gplus', ego_nets=False, max_num_egonets=-1):
+def preprocess_snap_ego_nets(input_dir, network_type='gplus', ego_nets=False, max_num_egonets=-1, max_graph_size=-1):
     """
     Load ego nets from files in input_dir.
     Returns a dictionary of networkx graphs.
@@ -146,6 +146,9 @@ def preprocess_snap_ego_nets(input_dir, network_type='gplus', ego_nets=False, ma
         
         G_combined = nx.compose(G_combined, ego_net)
         feats_combined = {**feats_combined, **feats_dir}
+
+        if max_graph_size != -1 and G_combined.number_of_nodes() > max_graph_size:
+            break
 
     nx.set_node_attributes(G_combined, feats_combined, 'features')
 
@@ -374,8 +377,8 @@ def sample_ego_nets(G, n_samples=10, radius=2, seed=0):
     return ego_nets
 
 if __name__ == '__main__':
-    input_dir = 'datasets/gplus'
-    ego_nets = preprocess_snap_ego_nets(input_dir, network_type='gplus', ego_nets=True, max_num_egonets=20)
+    input_dir = 'datasets/facebook'
+    ego_nets = preprocess_snap_ego_nets(input_dir, network_type='facebook', ego_nets=True, max_num_egonets=20, max_graph_size=2000)
 
     # for name in ['Caltech36', 'Swarthmore42', 'UChicago30']:
     #     print(name)
