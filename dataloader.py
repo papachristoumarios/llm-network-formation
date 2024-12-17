@@ -9,6 +9,84 @@ import pandas as pd
 import os
 import json
 import seaborn as sns
+import powerlaw as pwl
+import matplotlib
+
+MEDIUM_SIZE = 24
+SMALL_SIZE = 0.85 * MEDIUM_SIZE
+BIGGER_SIZE = 1.5 * MEDIUM_SIZE
+SMALLEST_SIZE = 0.5 * MEDIUM_SIZE
+
+plt.rc('font', size=SMALL_SIZE)          # controls default text sizes
+plt.rc('axes', titlesize=SMALL_SIZE)     # fontsize of the axes title
+plt.rc('axes', labelsize=MEDIUM_SIZE)    # fontsize of the x and y labels
+plt.rc('xtick', labelsize=SMALLEST_SIZE)    # fontsize of the tick labels
+plt.rc('ytick', labelsize=SMALLEST_SIZE)    # fontsize of the tick labels
+plt.rc('legend', fontsize=SMALLEST_SIZE)    # legend fontsize
+plt.rc('figure', titlesize=MEDIUM_SIZE)  # fontsize of the figure title
+
+def plot_stats(G, title):
+
+    sns.set_palette(['#2980b9', '#f1c40f', '#7f8c8d', '#d35400', '#34495e', '#e67e22'])
+
+    fig, ax = plt.subplots(1, 3, figsize=(15, 5))
+
+    degress = [G.degree(x) for x in G.nodes()]
+
+    powerlaw_fit = pwl.Fit(degress, discrete=True)
+
+    ax[0].set_title('Degree Distribution')
+
+    powerlaw_fit.plot_ccdf(linewidth=3, ax=ax[0], color='#e74c3c', label='Empirical')
+    powerlaw_fit.power_law.plot_ccdf(ax=ax[0], color='#e74c3c', linestyle='--', label='Fit')
+
+    ax[0].legend()
+    ax[0].xaxis.set_major_locator(matplotlib.ticker.LogLocator(base=10))
+
+    ax[0].xaxis.set_minor_formatter(matplotlib.ticker.NullFormatter())
+
+    plt.setp(ax[0].get_xticklabels(), rotation=45, horizontalalignment='right')
+
+
+    clustering_coeffs = np.array(list(nx.clustering(G).values()))
+
+    # histogram with matplotlib
+
+    ax[1].hist(clustering_coeffs, bins=20, alpha=0.75, color='#2ecc71')
+
+    ax[1].set_title('Clustering Coefficient')
+    # ax[1].set_xlabel('Clustering Coeff.')
+
+
+    # Assortativities with respect to each feature
+    features_expanded = collections.defaultdict(dict)
+
+    for u in G.nodes():
+        for k in G.nodes[u]['features']:
+            features_expanded[k][u] = G.nodes[u]['features'][k]
+
+    assortativities = {}
+
+    for k in features_expanded:
+        nx.set_node_attributes(G, features_expanded[k], k)
+        assortativities[k] = nx.attribute_assortativity_coefficient(G, k)
+    
+    sns.barplot(x=list(assortativities), y=list(assortativities.values()), ax=ax[2])
+
+    # rotate x ticks
+    for tick in ax[2].get_xticklabels():
+        tick.set(rotation=45)
+
+    ax[2].set_title('Assortativities')
+
+    # remove top and right spines
+    for a in ax:
+        a.spines['top'].set_visible(False)
+        a.spines['right'].set_visible(False)
+
+    fig.suptitle(title, y=1.05) 
+
+    fig.savefig( f'figures/{title}_stats.png', bbox_inches='tight', dpi=300)
 
 def jaccard(X, Y):
     U = X.union(Y)
@@ -28,7 +106,7 @@ def load_snap_ego_nets(input_dir, name):
 
     return {-1: G}
 
-def preprocess_snap_ego_nets(input_dir, network_type='gplus', ego_nets=False, max_num_egonets=-1, max_graph_size=-1):
+def preprocess_snap_ego_nets(input_dir, network_type='gplus', ego_nets=False, max_num_egonets=-1):
     """
     Load ego nets from files in input_dir.
     Returns a dictionary of networkx graphs.
@@ -146,9 +224,6 @@ def preprocess_snap_ego_nets(input_dir, network_type='gplus', ego_nets=False, ma
         
         G_combined = nx.compose(G_combined, ego_net)
         feats_combined = {**feats_combined, **feats_dir}
-
-        if max_graph_size != -1 and G_combined.number_of_nodes() > max_graph_size:
-            break
 
     nx.set_node_attributes(G_combined, feats_combined, 'features')
 
@@ -306,55 +381,7 @@ def load_facebook100(input_dir, name, num_egonets=10, egonets_radius=2, sample_e
     G = nx.from_numpy_array(A.toarray())
     nx.set_node_attributes(G, feats_dir, 'features')
 
-    fig, ax = plt.subplots(1, 2, figsize=(10, 5))
-
-    similarities = []
-
-    for (u, v) in G.edges():
-        feats_u = G.nodes[u]['features']
-        feats_v = G.nodes[v]['features']
-
-        # count values that match
-        common_feats = sum([1 for k in feats_u if k in feats_v and feats_u[k] == feats_v[k]])
-
-        similarities.append(common_feats)
-
-    sns.histplot(similarities, ax=ax[0], stat='probability', discrete=True)
-
-    ax[0].set_title('Similarity distribution')
-    ax[0].set_xlabel('Number of common features')
-
-    # Assortativities with respect to each feature
-    features_expanded = collections.defaultdict(dict)
-
-    for u in G.nodes():
-        for k in G.nodes[u]['features']:
-            features_expanded[k][u] = G.nodes[u]['features'][k]
-
-    assortativities = {}
-
-    for k in features_expanded:
-        nx.set_node_attributes(G, features_expanded[k], k)
-        assortativities[k] = nx.attribute_assortativity_coefficient(G, k)
-    
-    sns.barplot(x=list(assortativities), y=list(assortativities.values()), ax=ax[1])
-
-    # rotate x ticks
-    for tick in ax[1].get_xticklabels():
-        tick.set(rotation=90)
-
-    ax[1].set_title('Assortativities')
-    ax[1].set_xlabel('Feature')
-
-
-    # remove top and right spines
-    for a in ax:
-        a.spines['top'].set_visible(False)
-        a.spines['right'].set_visible(False)
-
-    fig.suptitle(f'{name.title()}') 
-
-    fig.savefig(input_dir + f'/{name}_feat_freq_sim.png', bbox_inches='tight')
+    plot_stats(G, f'Facebook100 {name.title()}')
 
     if sample_egonets:
         networks = sample_ego_nets(G, n_samples=num_egonets, radius=egonets_radius)
@@ -376,10 +403,46 @@ def sample_ego_nets(G, n_samples=10, radius=2, seed=0):
 
     return ego_nets
 
-if __name__ == '__main__':
-    input_dir = 'datasets/facebook'
-    ego_nets = preprocess_snap_ego_nets(input_dir, network_type='facebook', ego_nets=True, max_num_egonets=20, max_graph_size=2000)
+def load_andorra(input_dir):
+    df_edges = pd.read_csv(input_dir + '/andorra.txt', sep=' ', header=None)
+    df_attributes = pd.read_csv(input_dir + '/andorra_attributes_bin.txt', sep=' ', names=['Phone Type', 'Location', 'Usage'], header=None)
 
-    # for name in ['Caltech36', 'Swarthmore42', 'UChicago30']:
-    #     print(name)
-    #     load_facebook100('datasets/facebook100', name, sample_egonets=False, num_egonets=-1, egonets_radius=-1)
+    phone_types_dict = {0: 'Apple', 1: 'Samsung', 2: 'Other'}
+    usage_dict = {0: 'High', 1: 'Low'}
+    
+    df_attributes['Phone Type'] = df_attributes['Phone Type'].apply(lambda x: phone_types_dict[x])
+    df_attributes['Usage'] = df_attributes['Usage'].apply(lambda x: usage_dict[x])
+    
+    G = nx.from_pandas_edgelist(df_edges, source=0, target=1)
+
+    nx.set_node_attributes(G, df_attributes.to_dict('index'), 'features')   
+
+    plot_stats(G, 'Andorra') 
+
+    print(nx.info(G))
+
+    return {-1: G}
+
+def load_mobiled(input_dir):
+    df_edges = pd.read_csv(input_dir + '/mobiled.txt', sep=' ', header=None)
+    df_attributes = pd.read_csv(input_dir + '/mobiled_attributes.txt', sep=' ', names=['Employee Type'], header=None)
+
+    employee_types_dict = {0: 'Manager', 1: 'Employee'}
+    df_attributes['Employee Type'] = df_attributes['Employee Type'].apply(lambda x: employee_types_dict[x])
+
+    G = nx.from_pandas_edgelist(df_edges, source=0, target=1)
+
+    nx.set_node_attributes(G, df_attributes.to_dict('index'), 'features')   
+
+    plot_stats(G, 'MobileD') 
+
+    print(nx.info(G))
+
+    return {-1: G}
+
+if __name__ == '__main__':
+    load_andorra('datasets/andorra')
+    load_mobiled('datasets/mobiled')
+
+    for name in ['Caltech36', 'Swarthmore42', 'UChicago30']:
+        load_facebook100('datasets/facebook100', name, num_egonets=10, egonets_radius=2, sample_egonets=True)
