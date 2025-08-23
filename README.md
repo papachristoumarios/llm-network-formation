@@ -34,9 +34,12 @@ The output figures are saved in `figures/`. The output tables are located in `ta
 
 The (cached) outputs of the simulations are located in `outputs/`. If you wish to rerun the experiments, erase the contents of this directory. 
 
-### Simulation outputs for the real-world datasets
+### Simulation outputs for the real-world datasets and human baseline data
 
-The simulation outputs for the real-world datasets can be found [here](https://drive.google.com/drive/folders/1pP-zOe4XS--5MArs6Hr4_hUmRhgomzzK?usp=drive_link). To include them in the project, download them and place them in the `outputs/` folder. 
+The simulation outputs for the real-world datasets can be found [here](https://drive.google.com/drive/folders/1nalOHz7fYA7EFegZ1wKuwz56BMuZB1ex?usp=drive_link). 
+
+To include the pre-run simulation outputs in the project, download them and place them in the `outputs/` folder. 
+To include the human baseline data in the project, download them and place them in the `user_study_data_public` directory.
 
 ### Running the experiments on your own data
 
