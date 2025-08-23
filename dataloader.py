@@ -12,22 +12,23 @@ import seaborn as sns
 import powerlaw as pwl
 import matplotlib
 
-MEDIUM_SIZE = 24
-SMALL_SIZE = 0.85 * MEDIUM_SIZE
-BIGGER_SIZE = 1.5 * MEDIUM_SIZE
-SMALLEST_SIZE = 0.5 * MEDIUM_SIZE
-
-plt.rc('font', size=SMALL_SIZE)          # controls default text sizes
-plt.rc('axes', titlesize=SMALL_SIZE)     # fontsize of the axes title
-plt.rc('axes', labelsize=MEDIUM_SIZE)    # fontsize of the x and y labels
-plt.rc('xtick', labelsize=SMALLEST_SIZE)    # fontsize of the tick labels
-plt.rc('ytick', labelsize=SMALLEST_SIZE)    # fontsize of the tick labels
-plt.rc('legend', fontsize=SMALLEST_SIZE)    # legend fontsize
-plt.rc('figure', titlesize=MEDIUM_SIZE)  # fontsize of the figure title
 
 def plot_stats(G, title):
 
     sns.set_palette(['#2980b9', '#f1c40f', '#7f8c8d', '#d35400', '#34495e', '#e67e22'])
+
+    MEDIUM_SIZE = 24
+    SMALL_SIZE = 0.85 * MEDIUM_SIZE
+    BIGGER_SIZE = 1.5 * MEDIUM_SIZE
+    SMALLEST_SIZE = 0.5 * MEDIUM_SIZE
+
+    plt.rc('font', size=SMALL_SIZE)          # controls default text sizes
+    plt.rc('axes', titlesize=SMALL_SIZE)     # fontsize of the axes title
+    plt.rc('axes', labelsize=MEDIUM_SIZE)    # fontsize of the x and y labels
+    plt.rc('xtick', labelsize=SMALLEST_SIZE)    # fontsize of the tick labels
+    plt.rc('ytick', labelsize=SMALLEST_SIZE)    # fontsize of the tick labels
+    plt.rc('legend', fontsize=SMALLEST_SIZE)    # legend fontsize
+    plt.rc('figure', titlesize=MEDIUM_SIZE)  # fontsize of the figure title
 
     fig, ax = plt.subplots(1, 3, figsize=(15, 5))
 
@@ -381,7 +382,7 @@ def load_facebook100(input_dir, name, num_egonets=10, egonets_radius=2, sample_e
     G = nx.from_numpy_array(A.toarray())
     nx.set_node_attributes(G, feats_dir, 'features')
 
-    plot_stats(G, f'Facebook100 {name.title()}')
+    # plot_stats(G, f'Facebook100 {name.title()}')
 
     if sample_egonets:
         networks = sample_ego_nets(G, n_samples=num_egonets, radius=egonets_radius)
@@ -417,9 +418,9 @@ def load_andorra(input_dir):
 
     nx.set_node_attributes(G, df_attributes.to_dict('index'), 'features')   
 
-    plot_stats(G, 'Andorra') 
+    # plot_stats(G, 'Andorra') 
 
-    print(nx.info(G))
+    # print(nx.info(G))
 
     return {-1: G}
 
@@ -434,11 +435,12 @@ def load_mobiled(input_dir):
 
     nx.set_node_attributes(G, df_attributes.to_dict('index'), 'features')   
 
-    plot_stats(G, 'MobileD') 
+    # plot_stats(G, 'MobileD') 
 
-    print(nx.info(G))
+    # print(nx.info(G))
 
     return {-1: G}
+
 
 if __name__ == '__main__':
     load_andorra('datasets/andorra')

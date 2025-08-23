@@ -21,21 +21,24 @@ with open('params.json') as f:
 openai.api_key = params['OPENAI_API_KEY']
 openai.organization = params['OPENAI_ORG']
 
-MEDIUM_SIZE = 24
-SMALL_SIZE = 0.85 * MEDIUM_SIZE
-BIGGER_SIZE = 1.5 * MEDIUM_SIZE
-
-plt.rc('font', size=SMALL_SIZE)          # controls default text sizes
-plt.rc('axes', titlesize=SMALL_SIZE)     # fontsize of the axes title
-plt.rc('axes', labelsize=MEDIUM_SIZE)    # fontsize of the x and y labels
-plt.rc('xtick', labelsize=SMALL_SIZE)    # fontsize of the tick labels
-plt.rc('ytick', labelsize=SMALL_SIZE)    # fontsize of the tick labels
-plt.rc('legend', fontsize=SMALL_SIZE)    # legend fontsize
-plt.rc('figure', titlesize=BIGGER_SIZE)  # fontsize of the figure title
-
 claude_client = anthropic.Anthropic(api_key=params['ANTHROPIC_API_KEY'])
 replicate_client = replicate.Client(api_token=params['REPLICATE_API_KEY'])
 openai_client = openai.Client(api_key=params['OPENAI_API_KEY'])
+
+def set_plot_sizes():
+
+    MEDIUM_SIZE = 24
+    SMALL_SIZE = 0.85 * MEDIUM_SIZE
+    BIGGER_SIZE = 1.5 * MEDIUM_SIZE
+
+    plt.rc('font', size=SMALL_SIZE)          # controls default text sizes
+    plt.rc('axes', titlesize=SMALL_SIZE)     # fontsize of the axes title
+    plt.rc('axes', labelsize=MEDIUM_SIZE)    # fontsize of the x and y labels
+    plt.rc('xtick', labelsize=SMALL_SIZE)    # fontsize of the tick labels
+    plt.rc('ytick', labelsize=SMALL_SIZE)    # fontsize of the tick labels
+    plt.rc('legend', fontsize=SMALL_SIZE)    # legend fontsize
+    plt.rc('figure', titlesize=BIGGER_SIZE)  # fontsize of the figure title
+
 
 def get_response(prompt, model, temperature=0.9, system_prompt="You are mimicking a real-life person who wants to make friends."):
     if model.startswith('gpt'):
