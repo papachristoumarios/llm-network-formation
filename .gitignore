@@ -161,4 +161,4 @@ cython_debug/
 #.idea/
 
 # Misc
-params.json
+params*.json
