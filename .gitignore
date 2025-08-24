@@ -163,6 +163,7 @@ cython_debug/
 # Misc
 params*.json
 user_study_data/
+user_study_data_public/
 tables/
 outputs/
 outputs_simple/
